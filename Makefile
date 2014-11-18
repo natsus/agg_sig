@@ -1,19 +1,22 @@
-CXX = gcc
-LIBS = -ltepla -lgmp
+CXX = g++
+LIBS = -ltepla -lcrypto -lgmp
 CXXFLAGS  = -Wall -g -O4
 
 TARGET = main
+OBJ = main.o
+LIBDIR = -L/usr/local/lib
+INCDIR = -I/usr/local/include
 
 all: $(TARGET)
 
 %: %.o
-	$(CXX) $(CXXFLAGS) -o $@ $< $(LIBS)
+	$(CXX) $(CXXFLAGS) -o $@ $< $(INCDIR) $(LIBDIR) $(LIBS)
  
-%.o: %.c
-	$(CXX) $(CXXFLAGS) -c $<
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< $(INCDIR)
 
-%.o: agg_sig.h
+$(OBJ): agg_sig.h
 
 .PHONY: clean
 clean:
-	$(RM) *~ $(TARGET)
+	$(RM) *~ $(TARGET) $(OBJ)
