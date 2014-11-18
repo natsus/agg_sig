@@ -14,6 +14,7 @@ using namespace std;
 class AggSig {
   public:
     AggSig();
+    void point_print(const char* , const EC_POINT );
 /*
     set_message();
     key_gen();
@@ -48,17 +49,29 @@ void AggSig::get_g2(EC_POINT g2){
   mpz_t cofactor;
   mpz_init(cofactor);
   mpz_set(cofactor, prg->g2->cofactor);
+  // gmp_printf ("%s is an mpz %Zd\n", "cofactor", cofactor);
   EC_POINT P;
   point_init(P, prg->g2);
 
-  cout << "hoge\n";
   do {
     point_random(P);
     point_mul(g2, cofactor, P);
-  } while (point_is_infinity(g2) == 0) ;   // not infinity
+    // cout << point_is_infinity(g2) << endl;
+  } while (point_is_infinity(g2) != 0) ;   // exit not infinity
+  // point_print("g2", g2);
 
-  cout << "hoge\n";
   // clear
   mpz_clear(cofactor);
   point_clear(P);
+}
+
+void AggSig::point_print(const char *s, const EC_POINT x)
+{
+  int size = point_get_str_length(x);
+  char *str = (char*)malloc(sizeof(char)*size);
+
+  point_get_str(str, x);
+  printf("%s: %s\n", s, str);
+
+  free(str);
 }
