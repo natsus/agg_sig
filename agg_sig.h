@@ -1,6 +1,8 @@
 #include <iostream>
 using namespace std;
 
+#include <string>
+#include <vector>
 #include <gmp.h>
 // #include <gmpxx.h>
 
@@ -11,70 +13,144 @@ using namespace std;
 #endif
 
 
-class AggSig {
+void point_print( const string , const EC_POINT );
+void element_print( const string , const Element );
+
+void point_print(const string s, const EC_POINT x)
+{
+  int size = point_get_str_length(x);
+  char *str = new char[size];
+
+  point_get_str(str, x);
+  cout << s << str << endl;
+
+  delete [] str;
+}
+
+void element_print(const string s, const Element x)
+{
+  int size = element_get_str_length(x);
+  char *str = new char[size];
+
+  element_get_str(str, x);
+  cout << s << str << endl;
+
+  delete [] str;
+}
+
+class Sig
+{
   public:
-    AggSig();
-    ~AggSig();
+    Sig();
+    ~Sig();
     void key_gen();
-    void sign( const char* , size_t );
-    bool vrfy(const char* , size_t );
+    void sign( const string );
+    bool vrfy( const string );
+    void set_sig( EC_POINT );
+    void set_sig_inf();
+    ec_point_st* get_v();
+    ec_point_st* get_sig();
+    ec_point_st* get_g2();
+    void sig_add( Sig* , Sig* );
+    void sig_print( const string );
+    static void init()
+    {
+      mpz_init(tmp);
+
+      pairing_init(prg, "ECBN254");
+      point_init(g2, prg->g2);
+
+      gen_g2();
+      // cout << "g2: \n";
+      // point_print("", g2);
+
+      field_init(f, "bn254_fp");
+      // gmp_printf ("%s is an mpz %Zd\n", "order of f", f->order);
+    }
+
+    static void fin()
+    {
+      field_clear(f);
+      point_clear(g2);
+      pairing_clear(prg);
+      mpz_clear(tmp);
+    }
+
 
   private:
-    EC_PAIRING prg;
-    EC_POINT G1, G2, g2, v, h, s;
-    Field f ;
+    static EC_PAIRING prg;
+    static EC_POINT g2;
+    EC_POINT G1, G2, v, h, s;
+    static Field f ;
     Element x;
-    mpz_t tmp;
+    static mpz_t tmp;
 
-    void get_g2();
-    void point_print( const char* , const EC_POINT );
-    void element_print( const char* , const Element );
+    static void gen_g2();
     void set_mpz_from_element( mpz_t , Element );
 
 };
 
-AggSig::AggSig()
-{
-  mpz_init(tmp);
+EC_PAIRING Sig::prg;
+EC_POINT Sig::g2;
+Field Sig::f;
+mpz_t Sig::tmp;
 
-  pairing_init(prg, "ECBN254");
+Sig::Sig()
+{
   point_init(G1, prg->g1);
   point_init(G2, prg->g2);
-  point_init(g2, prg->g2);
   point_init(v , prg->g2);
   point_init(h , prg->g1);
   point_init(s , prg->g1);
 
-  get_g2();
-
-  field_init(f, "bn254_fp");
-  // gmp_printf ("%s is an mpz %Zd\n", "order of f", f->order);
   element_init(x, f);
 
   key_gen();
-
 }
 
-AggSig::~AggSig()
+Sig::~Sig()
 {
   element_clear(x);
 
-  field_clear(f);
-
   point_clear(G1);
   point_clear(G2);
-  point_clear(g2);
   point_clear(v);
   point_clear(h);
   point_clear(s);
+}
 
-  pairing_clear(prg);
+void Sig::set_sig(EC_POINT s)
+{
+  point_set( this->s , s );
+}
 
-  mpz_clear(tmp);
+void Sig::set_sig_inf()
+{
+  point_set_infinity( this->s );
+}
+
+ec_point_st* Sig::get_v()
+{
+  return this->v;
+}
+
+ec_point_st* Sig::get_sig()
+{
+  return this->s;
+}
+
+ec_point_st* Sig::get_g2()
+{
+  return this->g2;
+}
+
+void Sig::sig_add(Sig* s1, Sig* s2)
+{
+  point_add (this->s, s1->get_sig(), s2->get_sig());
 }
 
 // Key Generation
-void AggSig::key_gen()
+void Sig::key_gen()
 {
   // *** generation of secret key 'x' (random value) ***
   element_random(x);
@@ -88,10 +164,13 @@ void AggSig::key_gen()
 }
 
 // Signing
-void AggSig::sign( const char* m, size_t slen)
+void Sig::sign( const string m )
 {
   // *** h ← H(M) ***
-  point_map_to_point(h, m, slen, 128);
+  point_map_to_point(h, m.c_str(), m.size(), 192);
+  // cout << m << ": ";
+  // point_print("", h);
+
 
   // *** generation of signature 's' ***
   set_mpz_from_element(tmp, x); // tmp(mpz_t) ← x(Element)
@@ -99,7 +178,7 @@ void AggSig::sign( const char* m, size_t slen)
 }
 
 // Verification
-bool AggSig::vrfy(const char* m, size_t slen)
+bool Sig::vrfy(const string m )
 {
   // *** initialization ***
   Element t1, t2;
@@ -109,7 +188,7 @@ bool AggSig::vrfy(const char* m, size_t slen)
 
 
   // *** h ← H(M) ***
-  point_map_to_point(h, m, slen, 128);
+  point_map_to_point(h, m.c_str(), m.size(), 192);
 
 
   // *** pairing computation ***
@@ -125,7 +204,7 @@ bool AggSig::vrfy(const char* m, size_t slen)
   return rslt;
 }
 
-void AggSig::get_g2()
+void Sig::gen_g2()
 {
   // init
   mpz_set(tmp, prg->g2->cofactor);
@@ -144,7 +223,7 @@ void AggSig::get_g2()
   point_clear(P);
 }
 
-void  AggSig::set_mpz_from_element(mpz_t tmp, Element x)
+void Sig::set_mpz_from_element(mpz_t tmp, Element x)
 {
   int size = element_get_str_length(x);
   char *str = new char[size];
@@ -157,24 +236,97 @@ void  AggSig::set_mpz_from_element(mpz_t tmp, Element x)
   delete [] str;
 }
 
-void AggSig::point_print(const char *s, const EC_POINT x)
+void Sig::sig_print( const string str )
 {
-  int size = point_get_str_length(x);
-  char *str = (char*)malloc(sizeof(char)*size);
-
-  point_get_str(str, x);
-  printf("%s: %s\n", s, str);
-
-  free(str);
+  point_print(str, this->s);
 }
 
-void AggSig::element_print(const char *s, const Element x)
+
+class AggSig
 {
-  int size = element_get_str_length(x);
-  char *str = new char[size];
+  public:
+    AggSig();
+    ~AggSig();
+    Sig* agg( Sig* , int );
+    bool vrfy( string*, Sig* , int );
+  private:
+    Sig asig;
+    EC_PAIRING prg;
+};
 
-  element_get_str(str, x);
-  cout << s << str << endl;
+AggSig::AggSig()
+{
+  pairing_init(prg, "ECBN254");
+  asig.set_sig_inf(); // init identity element
+}
 
-  delete [] str;
+AggSig::~AggSig()
+{
+  pairing_clear(prg);
+}
+
+// Aggregation
+Sig* AggSig::agg(Sig *sigs, int size)
+{
+  if (size==0) {
+    cout << "sigunare is empty. Can't aggregate opt. \n";
+    return &asig;
+  }
+  while (size--, size>=0) {
+    // cout<< "size: " << size << endl;
+    asig.sig_add(&asig, sigs+size); // asig = asig + sigs[size]
+  }
+  return &asig;
+}
+
+// Aggregation Verification
+bool AggSig::vrfy(string *msgs, Sig *sigs, int size)
+{
+  
+  // *** initialization ***
+  Element t1, t2;
+  Sig tmp;
+  element_init(t1, prg->g3);
+  element_init(t2, prg->g3);
+  element_set_one(t1);
+  element_set_one(t2);
+  bool rslt = false;
+
+  EC_POINT* hashs = new EC_POINT[size]; 
+  for (int i=0; i<size; i++) {
+    point_init(hashs[i], prg->g1);
+  }
+
+
+  // *** h ← H(M) ***
+  for (int i=0; i<size; i++) {
+    point_map_to_point(hashs[i], msgs[i].c_str(), msgs[i].size(), 192);
+    // cout << msgs[i] << ": ";
+    // point_print("", hashs[i]);
+  }
+
+  // *** pairing computation ***
+  // *** e(s,g2), Π e(hi,vi) ***
+  for (int i=0; i<size; i++) {
+    // point_print("sig: \n", sigs[i].get_sig());
+    pairing_map(t1, hashs[i], sigs[i].get_v(), prg); // t1 = e(hi,vi)
+    // element_print("t1: ", t1);
+    // element_print("t2: ", t2);
+
+    element_mul (t2, t1, t2); // t2 = t1 * t2
+
+    // element_print("t1*t2: ", t2);
+  }
+  pairing_map(t1, asig.get_sig(), asig.get_g2(), prg);
+  rslt = element_cmp(t1, t2) == 0 ? true : false;
+  // *** finalization ***
+  element_clear(t1);
+  element_clear(t2);
+
+  for (int i=0; i<size; i++) {
+    point_clear(hashs[i]);
+  }
+  delete [] hashs;
+
+  return rslt;
 }
