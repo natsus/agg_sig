@@ -22,7 +22,7 @@ int main()
   string msgs[size] = { "fuga1" , "fuga2" };
   string msgs1[size] = { "fuga1" , "fuga3" };
   string msgs2[size] = { "fuga2" , "fuga1" };
-  Sig sigs[size];
+  Sig* sigs = new Sig[size];
 
   for (int i=0; i< size; i++) {
     sigs[i].sign(msgs[i]);
@@ -35,12 +35,15 @@ int main()
 
   r2 = fuga.vrfy(msgs1, sigs, size);
   assert( false == r2 );
-  r2 = fuga.vrfy(msgs2, sigs, size);
-  assert( false == r2 );
+
+  // メッセージの順番を逆にした時
+  r2 = fuga.vrfy2(msgs2, sigs, size);
+  assert( true == r2 );
 
   // apend
 
   // delete
+  delete [] sigs;
 
   // Sig::fin();
   return 0;

@@ -146,7 +146,22 @@ ec_point_st* Sig::get_g2()
 
 void Sig::sig_add(Sig* s1, Sig* s2)
 {
+  /*
+  EC_POINT P;
+  point_init(P, prg->g1);
+
+  point_add (P, s1->get_sig(), s2->get_sig());
+  point_print("s1+s2: ", P);
+
+  point_add (P, s2->get_sig(), s1->get_sig());
+  point_print("s2+s1: ", P);
+
+  point_clear(P);
+  */
+
+
   point_add (this->s, s1->get_sig(), s2->get_sig());
+  // point_print("add:   ", this->s);
 }
 
 // Key Generation
@@ -189,6 +204,8 @@ bool Sig::vrfy(const string m )
 
   // *** h ← H(M) ***
   point_map_to_point(h, m.c_str(), m.size(), 192);
+  // cout << m << ": ";
+  // point_print("", h);
 
 
   // *** pairing computation ***
@@ -217,7 +234,11 @@ void Sig::gen_g2()
     point_mul(g2, tmp, P);
     // cout << point_is_infinity(g2) << endl;
   } while (point_is_infinity(g2) != 0) ;   // exit not infinity
-  // point_print("g2", g2);
+  /*
+  point_print("g2", g2);
+  point_mul(P, *pairing_get_order(prg), g2);
+  point_print("g2 * order", P);
+  */
 
   // clear
   point_clear(P);
@@ -249,6 +270,7 @@ class AggSig
     ~AggSig();
     Sig* agg( Sig* , int );
     bool vrfy( string*, Sig* , int );
+    bool vrfy2( string*, Sig* , int );
   private:
     Sig asig;
     EC_PAIRING prg;
@@ -268,6 +290,8 @@ AggSig::~AggSig()
 // Aggregation
 Sig* AggSig::agg(Sig *sigs, int size)
 {
+  asig.set_sig_inf(); // init identity element
+
   if (size==0) {
     cout << "sigunare is empty. Can't aggregate opt. \n";
     return &asig;
@@ -310,12 +334,85 @@ bool AggSig::vrfy(string *msgs, Sig *sigs, int size)
   for (int i=0; i<size; i++) {
     // point_print("sig: \n", sigs[i].get_sig());
     pairing_map(t1, hashs[i], sigs[i].get_v(), prg); // t1 = e(hi,vi)
-    // element_print("t1: ", t1);
-    // element_print("t2: ", t2);
+    /*
+    element_print("t1: ", t1);
+    element_print("t2: ", t2);
+    Element t3;
+    element_init(t3, prg->g3);
+
+    element_mul (t3, t1, t2); // t2 = t1 * t2
+    element_print("t1*t2: ", t3);
+    
+    element_mul (t3, t2, t1); // t2 = t2 * t1
+    element_print("t2*t1: ", t3);
+    element_clear(t3);
+    */
+
+
 
     element_mul (t2, t1, t2); // t2 = t1 * t2
+  }
+  pairing_map(t1, asig.get_sig(), asig.get_g2(), prg);
+  rslt = element_cmp(t1, t2) == 0 ? true : false;
+  // *** finalization ***
+  element_clear(t1);
+  element_clear(t2);
 
-    // element_print("t1*t2: ", t2);
+  for (int i=0; i<size; i++) {
+    point_clear(hashs[i]);
+  }
+  delete [] hashs;
+
+  return rslt;
+}
+
+bool AggSig::vrfy2(string *msgs, Sig *sigs, int size)
+{
+  
+  // *** initialization ***
+  Element t1, t2;
+  Sig tmp;
+  element_init(t1, prg->g3);
+  element_init(t2, prg->g3);
+  element_set_one(t1);
+  element_set_one(t2);
+  bool rslt = false;
+
+  EC_POINT* hashs = new EC_POINT[size]; 
+  for (int i=0; i<size; i++) {
+    point_init(hashs[i], prg->g1);
+  }
+
+
+  // *** h ← H(M) ***
+  for (int i=0; i<size; i++) {
+    point_map_to_point(hashs[i], msgs[i].c_str(), msgs[i].size(), 192);
+    // cout << msgs[i] << ": ";
+    // point_print("", hashs[i]);
+  }
+
+  // *** pairing computation ***
+  // *** e(s,g2), Π e(hi,vi) ***
+  for (int i=0; i<size; i++) {
+    // point_print("sig: \n", sigs[i].get_sig());
+    pairing_map(t1, hashs[i], sigs[size-i-1].get_v(), prg); // t1 = e(hi,vi)
+    /*
+    element_print("t1: ", t1);
+    element_print("t2: ", t2);
+    Element t3;
+    element_init(t3, prg->g3);
+
+    element_mul (t3, t1, t2); // t2 = t1 * t2
+    element_print("t1*t2: ", t3);
+    
+    element_mul (t3, t2, t1); // t2 = t2 * t1
+    element_print("t2*t1: ", t3);
+    element_clear(t3);
+    */
+
+
+
+    element_mul (t2, t1, t2); // t2 = t1 * t2
   }
   pairing_map(t1, asig.get_sig(), asig.get_g2(), prg);
   rslt = element_cmp(t1, t2) == 0 ? true : false;
