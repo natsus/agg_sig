@@ -26,3 +26,4 @@
 main*
 test*
 speed_check*
+!*.cpp
