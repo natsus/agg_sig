@@ -2,8 +2,8 @@ CXX = g++
 LIBS = -ltepla -lcrypto -lgmp
 CXXFLAGS  = -Wall -g -O4
 
-TARGET = main
-OBJ = main.o
+TARGET = main speed_check
+OBJ = main.o speed_check.o
 LIBDIR = -L/usr/local/lib
 INCDIR = -I/usr/local/include
 
