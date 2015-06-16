@@ -12,6 +12,9 @@ using namespace std;
   }
 #endif
 
+// hash size (map to point)
+const unsigned hash_size = 256;
+
 
 void point_print( const string , const EC_POINT );
 void element_print( const string , const Element );
@@ -182,7 +185,7 @@ void Sig::key_gen()
 void Sig::sign( const string m )
 {
   // *** h ← H(M) ***
-  point_map_to_point(h, m.c_str(), m.size(), 192);
+  point_map_to_point(h, m.c_str(), m.size(), hash_size);
   // cout << m << ": ";
   // point_print("", h);
 
@@ -203,7 +206,7 @@ bool Sig::vrfy(const string m )
 
 
   // *** h ← H(M) ***
-  point_map_to_point(h, m.c_str(), m.size(), 192);
+  point_map_to_point(h, m.c_str(), m.size(), hash_size);
   // cout << m << ": ";
   // point_print("", h);
 
@@ -324,7 +327,7 @@ bool AggSig::vrfy(string *msgs, Sig *sigs, int size)
 
   // *** h ← H(M) ***
   for (int i=0; i<size; i++) {
-    point_map_to_point(hashs[i], msgs[i].c_str(), msgs[i].size(), 192);
+    point_map_to_point(hashs[i], msgs[i].c_str(), msgs[i].size(), hash_size);
     // cout << msgs[i] << ": ";
     // point_print("", hashs[i]);
   }
@@ -386,7 +389,7 @@ bool AggSig::vrfy2(string *msgs, Sig *sigs, int size)
 
   // *** h ← H(M) ***
   for (int i=0; i<size; i++) {
-    point_map_to_point(hashs[i], msgs[i].c_str(), msgs[i].size(), 192);
+    point_map_to_point(hashs[i], msgs[i].c_str(), msgs[i].size(), hash_size);
     // cout << msgs[i] << ": ";
     // point_print("", hashs[i]);
   }
