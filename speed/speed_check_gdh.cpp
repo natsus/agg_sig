@@ -100,6 +100,12 @@ int main()
 
   et[3] = st[4] = getrusageSec();
 
+  cout << "\nsignature: \n";
+  cout << "   value: \n";
+  point_print("     ", sigs[0].get_sig());
+  point_print("     ", sigs[1].get_sig());
+  cout << "         ... (" << num << ")\n";
+  cout << "   size:  " << (point_get_str_length(sigs[0].get_sig())*sizeof(char)*num) << " bytes" << endl;
   // delete
   delete [] sigs;
   Sig::fin();
@@ -113,6 +119,7 @@ int main()
   cout << "entire time = " << (et[0] - st[0]) << " sec" << endl;
   cout << "memory size:  " << getrusageSize() << " bytes " << endl;
   // use_system();
+
 
   return 0;
 }

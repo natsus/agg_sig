@@ -90,6 +90,10 @@ int main()
 
   et[4] = st[5] = getrusageSec();
 
+  cout << "\nsignature: \n";
+  cout << "   value: "; point_print("", fuga.get_sig());
+  cout << "   size:  " << point_get_str_length(fuga.get_sig())*sizeof(char) << " bytes" << endl;
+
   // delete
   delete [] sigs;
   Sig::fin();

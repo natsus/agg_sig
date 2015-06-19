@@ -271,6 +271,7 @@ class AggSig
   public:
     AggSig();
     ~AggSig();
+    ec_point_st* get_sig();
     Sig* agg( Sig* , int );
     Sig* append( Sig*, int );
     bool vrfy( string*, Sig* , int );
@@ -289,6 +290,11 @@ AggSig::AggSig()
 AggSig::~AggSig()
 {
   pairing_clear(prg);
+}
+
+ec_point_st* AggSig::get_sig()
+{
+  return asig.get_sig();
 }
 
 // Aggregation
