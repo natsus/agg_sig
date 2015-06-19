@@ -73,9 +73,9 @@ class Sig
 
     static void fin()
     {
-      field_clear(f);
+      // field_clear(f);
       point_clear(g2);
-      pairing_clear(prg);
+      // pairing_clear(prg);
       mpz_clear(tmp);
     }
 
@@ -272,10 +272,11 @@ class AggSig
     AggSig();
     ~AggSig();
     Sig* agg( Sig* , int );
+    Sig* append( Sig*, int );
     bool vrfy( string*, Sig* , int );
     bool vrfy2( string*, Sig* , int );
   private:
-    Sig asig;
+    Sig asig;   // signature of aggregated
     EC_PAIRING prg;
 };
 
@@ -294,7 +295,13 @@ AggSig::~AggSig()
 Sig* AggSig::agg(Sig *sigs, int size)
 {
   asig.set_sig_inf(); // init identity element
+  return append(sigs, size);
+}
 
+// append
+// アグリゲートした後に新たに署名を追加する操作
+Sig* AggSig::append(Sig *sigs, int size)
+{
   if (size==0) {
     cout << "sigunare is empty. Can't aggregate opt. \n";
     return &asig;
