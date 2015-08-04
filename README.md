@@ -6,10 +6,11 @@ Elliptic Curve and Pairing Library)を利用したアグリゲート署名の実
 
 ## 詳細
 TEPLAで128bitセキュリティのBoneh等のアグリゲート署名を実装したため公開する。
-> "D. Boneh and M.K. Franklin, “Identity-based encryption from the Weil pairing,” CRYPTO, ed. by J. Kilian, vol.2139, pp.213–229, Lecture Notes in Computer Science, Springer, 2001."
+> "D. Boneh and M.K. Franklin, “Identity-based encryption from the Weil pairing,” CRYPTO, ed. by J. Kilian, vol.2139, pp.213–229, Lecture Notes in Computer Science, Springer, 2001."  
+
 あくまで、研究の評価を行うために作成したためClass等のインターフェースはまだまだ不十分であると思われるため要望があれば順次対応するつもりである。  
 また、バグ等の指摘も歓迎します。  
-簡単な実装の解説PDFも添付しています。(*[agg_sig.pdf](agg_sig.pdf)*)  
+簡単な実装の解説PDFも添付しています。(*[agg_sig_presen.pdf](agg_sig_presen.pdf)*)  
 また、適当な平文に署名をつけ、検証を行う実装速度の測定プログラムも作成しています。
 
 ## 環境
