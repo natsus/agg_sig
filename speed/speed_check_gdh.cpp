@@ -1,9 +1,10 @@
 #undef NDEBUG
 #include <iostream>
-#include <string>
+#include <string.h>
 #include <assert.h>
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <cstdlib>
 
 // getpid()
 #include <sys/types.h>
@@ -55,8 +56,7 @@ int main()
 {
   // 乱数のシードを現在の時刻で初期化
   srand((unsigned)time(NULL));
-  // const unsigned int num = 10000;
-  const unsigned int num = 100;
+  const unsigned int num = 10000;
   const char str_len = 100;
   string text_data[num];
   double st[5], et[5];
@@ -102,8 +102,10 @@ int main()
 
   cout << "\nsignature: \n";
   cout << "   value: \n";
-  point_print("     ", sigs[0].get_sig());
-  point_print("     ", sigs[1].get_sig());
+  point_print("     sig: ", sigs[0].get_sig());
+  point_print("     sk :", sigs[0].get_v());
+  point_print("     sig: ", sigs[1].get_sig());
+  point_print("     sk :", sigs[1].get_v());
   cout << "         ... (" << num << ")\n";
   cout << "   size:  " << (point_get_str_length(sigs[0].get_sig())*sizeof(char)*num) << " bytes" << endl;
   // delete
