@@ -22,7 +22,7 @@ double getrusageSec(){
   return s.tv_sec + (double)s.tv_usec*1e-6;
 }
 
-/* RAM 上に存在する仮想ページのサイズ (resident set size) の最大値 */
+/* Maximum value of resident set size on RAM */
 long getrusageSize(){
   struct rusage t;
   struct timeval s;
@@ -32,16 +32,7 @@ long getrusageSize(){
   return t.ru_maxrss;
 }
 
-/* ps コマンドを実行して簡易的なサイズの確認 */
-void use_system(void)
-{
-	char command[128];
-
-	sprintf(command, "ps -l %d", getpid());
-	system(command);
-}
-
-// len 文字のランダムな文字列を作成する関数
+// function that generates random string of len characters
 string str_gen(char len)
 {
   string str_data = "";
@@ -54,14 +45,14 @@ string str_gen(char len)
 }
 int main()
 {
-  // 乱数のシードを現在の時刻で初期化
+  // initilize the seed of random number by current time
   srand((unsigned)time(NULL));
   const unsigned int num = 10000;
   const char str_len = 100;
   string text_data[num];
   double st[5], et[5];
 
-  // len文字のnum個の文字列を作成する
+  // generate num strings of len characters
   for (int i=0; i<num; i++)
     text_data[i] = str_gen(str_len);
 
@@ -120,7 +111,6 @@ int main()
   cout << "final  time = " << (et[4] - st[4]) << " sec" << endl;
   cout << "entire time = " << (et[0] - st[0]) << " sec" << endl;
   cout << "memory size:  " << getrusageSize() << " bytes " << endl;
-  // use_system();
 
 
   return 0;

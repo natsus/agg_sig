@@ -34,7 +34,7 @@ int main()
   r2 = fuga.vrfy(msgs, sigs, size-tmp);
   assert( true == r2 );
 
-  // 署名の追加
+  // addition of a signature
   fuga.append( (sigs+(size-tmp)), tmp );
   r2 = fuga.vrfy(msgs, sigs, size);
   assert( true == r2 );
@@ -42,7 +42,7 @@ int main()
   r2 = fuga.vrfy(msgs1, sigs, size);
   assert( false == r2 );
 
-  // メッセージの順番を逆にした時
+  // generate an invalid case that reverses the order of messages
   r2 = fuga.vrfy2(msgs2, sigs, size);
   assert( true == r2 );
 

@@ -305,7 +305,7 @@ Sig* AggSig::agg(Sig *sigs, int size)
 }
 
 // append
-// アグリゲートした後に新たに署名を追加する操作
+// a processing that adds a new signature after an aggregation
 Sig* AggSig::append(Sig *sigs, int size)
 {
   if (size==0) {
