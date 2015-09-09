@@ -6,6 +6,7 @@ I implement Aggregate signature by using TEPLA(University of Tsukuba Elliptic Cu
 ## Detail
 I publish program source codes of Aggregate signature of Boneh et al. on 128 bit security. 
 > "D. Boneh and M.K. Franklin, “Identity-based encryption from the Weil pairing,” CRYPTO, ed. by J. Kilian, vol.2139, pp.213–229, Lecture Notes in Computer Science, Springer, 2001."  
+
 I implemented this program to evaluate my proposed method in my research,
 so I think it an imperfect implemantation about Class interfaces and so on.
 If you had some requests, comments or bug reports, I will respond it as much as I can.
