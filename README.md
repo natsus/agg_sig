@@ -1,35 +1,35 @@
-アグリゲート署名実装
+IMPLEMENTATION OF AGGREGATE SIGNATURE
 ====
 
-TEPLA(University of Tsukuba
-Elliptic Curve and Pairing Library)を利用したアグリゲート署名の実装
+I implement Aggregate signature by using TEPLA(University of Tsukuba Elliptic Curve and Pairing Library).
 
-## 詳細
-TEPLAで128bitセキュリティのBoneh等のアグリゲート署名を実装したため公開する。
+## Detail
+I publish program source codes of Aggregate signature of Boneh et al. on 128 bit security. 
 > "D. Boneh and M.K. Franklin, “Identity-based encryption from the Weil pairing,” CRYPTO, ed. by J. Kilian, vol.2139, pp.213–229, Lecture Notes in Computer Science, Springer, 2001."  
+I implemented this program to evaluate my proposed method in my research,
+so I think it an imperfect implemantation about Class interfaces and so on.
+If you had some requests, comments or bug reports, I will respond it as much as I can.
+And I attach a simple explanation PDF file of my implemantation in Japanese. 
+(*[agg_sig_presen.pdf](agg_sig_presen.pdf)*)  
+Also I implemented speed determination programs that signs some plaintexts and verifies signatures.
 
-あくまで、研究の評価を行うために作成したためClass等のインターフェースはまだまだ不十分であると思われるため要望があれば順次対応するつもりである。  
-また、バグ等の指摘も歓迎します。  
-簡単な実装の解説PDFも添付しています。(*[agg_sig_presen.pdf](agg_sig_presen.pdf)*)  
-また、適当な平文に署名をつけ、検証を行う実装速度の測定プログラムも作成しています。
-
-## 環境
+## Environment
 * gcc
 * TEPLA1.0  
-  DockerのTEPLAイメージファイルを作成したためこれを利用すると環境導入が容易になる。
+  I create TEPLA image file of Docker, so you can easily install the environment if you used this.
 <https://registry.hub.docker.com/u/natsu/tepla/>
 
 
-## 使い方
+## Usage
 
-### サンプルコードの実行
+### Execution of sample code
 ```sh
 $ make
 $ ./main
 ```
 
-**サンプルコード**  
-使い方はサンプルコードを参照されたし。
+**Sample Code**  
+Please, refer the following sample code and understand how to use this program.
 
 ```cpp
 #include <iostream>
@@ -67,7 +67,7 @@ int main()
   r2 = fuga.vrfy(msgs, sigs, size-tmp);
   assert( true == r2 );
 
-  // 署名の追加
+  // addition of a signature
   fuga.append( (sigs+(size-tmp)), tmp );
   r2 = fuga.vrfy(msgs, sigs, size);
   assert( true == r2 );
@@ -75,7 +75,7 @@ int main()
   r2 = fuga.vrfy(msgs1, sigs, size);
   assert( false == r2 );
 
-  // メッセージの順番を逆にした時
+  // generate an invalid case that reverses the order of messages
   r2 = fuga.vrfy2(msgs2, sigs, size);
   assert( true == r2 );
 
@@ -89,19 +89,19 @@ int main()
 }
 ```
 
-### 速度測定方法
+### Speed determination way
 ```sh
 $ cd speed
 $ make
 $ ./speed_check_agg
 $ ./speed_check_gdh
 ```
-平文の個数は*speed_check_agg.cpp*と*speed_check_gdh.cpp*のそれぞれの*num*で指定、平文の文字列は*str_len*を変更すると良い。
+You can assign the number of plaintexts and the length of plaintexts, each value is *num* and *str_len* in each source, *speed_check_agg.cpp* or *speed_check_gdh.cpp*.
 
-## ライセンス
+## LICENCE
 
 This software is released under the MIT License, see [LICENCE.txt](LICENCE.txt)
 
-## 参考文献
+## Reference
 
 * [TEPLA](http://www.cipher.risk.tsukuba.ac.jp/tepla/)
